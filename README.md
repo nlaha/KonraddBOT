@@ -1,2 +1,2 @@
 # KonraddBOT
-no
+shut up
