@@ -56,7 +56,10 @@ bot.on("message", async message => {
     // Only do if they have the role
     if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
         // shut em up
-        message.reply("shut up");
+        const user = getUserFromMention(args[0]);
+        if (user) {
+          message.channel.send("<@" + user.id + "> shut up")
+        }
     } else if(message.member.roles.find(r => r.name === "Enemy of Konradd")) {
         // Mark them for elimination by sending a message to the id below
         client.users.get("248964060945711104").send(`A user by the name ${message.member.user.tag} has been marked for elimination.`);
@@ -83,5 +86,19 @@ bot.on("message", async message => {
 
   }
 });
+
+function getUserFromMention(mention) {
+	if (!mention) return;
+
+	if (mention.startsWith('<@') && mention.endsWith('>')) {
+		mention = mention.slice(2, -1);
+
+		if (mention.startsWith('!')) {
+			mention = mention.slice(1);
+		}
+
+		return client.users.get(mention);
+	}
+}
 
 bot.login(config.token);
