@@ -42,7 +42,23 @@ bot.on("message", async message => {
   // Also good practice to ignore any message that does not start with our prefix, 
   // in this case, we're only going to accept input when the user mentions @botname (Konradd)
   const prefixMention = new RegExp(`^<@!?${bot.user.id}> `);
-    const prefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : '!';
+  if (message.content.match(prefixMention)) {
+      // Ok, we're not, so just reply with shut up
+      // Only do if they have the role
+      if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
+        // shut em up
+        message.reply("shut up");
+    } else if(message.member.roles.find(r => r.name === "Enemy of Konradd")) {
+        // Mark them for elimination by sending a message to the id below
+        client.users.get("248964060945711104").send(`A user by the name ${message.member.user.tag} has been marked for elimination.`);
+    } else {
+        // add them to the special role
+        var role = message.guild.roles.find(role => role.name === "Enemy of Konradd");
+        message.member.addRole(role);
+    }
+  } else{
+    return;
+  }
 
   // Here we separate our "command" name, and our "arguments" for the command. 
   // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
@@ -70,20 +86,7 @@ bot.on("message", async message => {
     }
 
   } else {
-    // Ok, we're not, so just reply with shut up
-    // Only do if they have the role
-    if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
-        // shut em up
-        message.reply("shut up");
-    } else if(message.member.roles.find(r => r.name === "Enemy of Konradd")) {
-        // Mark them for elimination by sending a message to the id below
-        client.users.get("248964060945711104").send(`A user by the name ${message.member.user.tag} has been marked for elimination.`);
-    } else {
-        // add them to the special role
-        var role = message.guild.roles.find(role => role.name === "Enemy of Konradd");
-        message.member.addRole(role);
-    }
-
+    return;
   }
 });
 
