@@ -42,7 +42,36 @@ bot.on("message", async message => {
   // Also good practice to ignore any message that does not start with our prefix, 
   // in this case, we're only going to accept input when the user mentions @botname (Konradd)
   const prefixMention = new RegExp(`^<@!?${bot.user.id}> `);
-  if (message.content.match(prefixMention)) {
+    const prefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : '!';
+
+  // Here we separate our "command" name, and our "arguments" for the command. 
+  // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
+  // command = say
+  // args = ["Is", "this", "the", "real", "life?"]
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase();
+
+  if (command) {
+    // If we're telling someone to shut up, do that
+    if(command === "tell") {
+      // Only do if they have the role
+      if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
+          // shut em up
+          const user = getUserFromMention(args[1]);
+          if (user) {
+            message.channel.send("<@" + user.id + "> shut up")
+          }
+      } else if(message.member.roles.find(r => r.name === "Enemy of Konradd")) {
+          // Mark them for elimination by sending a message to the id below
+          client.users.get("248964060945711104").send(`A user by the name ${message.member.user.tag} has been marked for elimination.`);
+      } else {
+          // add them to the special role
+          var role = message.guild.roles.find(role => role.name === "Enemy of Konradd");
+          message.member.addRole(role);
+      }
+
+    }
+  } else {
       // Ok, we're not, so just reply with shut up
       // Only do if they have the role
       if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
@@ -56,37 +85,6 @@ bot.on("message", async message => {
         var role = message.guild.roles.find(role => role.name === "Enemy of Konradd");
         message.member.addRole(role);
     }
-  } else{
-    return;
-  }
-
-  // Here we separate our "command" name, and our "arguments" for the command. 
-  // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
-  // command = say
-  // args = ["Is", "this", "the", "real", "life?"]
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-  const command = args.shift().toLowerCase();
-  
-  // If we're telling someone to shut up, do that
-  if(command === "tell") {
-    // Only do if they have the role
-    if(message.member.roles.find(r => r.name === "Friend of Konradd")) {
-        // shut em up
-        const user = getUserFromMention(args[0]);
-        if (user) {
-          message.channel.send("<@" + user.id + "> shut up")
-        }
-    } else if(message.member.roles.find(r => r.name === "Enemy of Konradd")) {
-        // Mark them for elimination by sending a message to the id below
-        client.users.get("248964060945711104").send(`A user by the name ${message.member.user.tag} has been marked for elimination.`);
-    } else {
-        // add them to the special role
-        var role = message.guild.roles.find(role => role.name === "Enemy of Konradd");
-        message.member.addRole(role);
-    }
-
-  } else {
-    return;
   }
 });
 
